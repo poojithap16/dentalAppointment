@@ -181,18 +181,27 @@ const bookAppointmentController = async (req, res) => {
       req.body.time = time;
       req.body.status = "pending";
 
+      // Fetch user information
+      const user = await userModel.findOne({ _id: req.body.userId });
+
+      req.body.userInfo = {
+          name: user.name,
+          email: user.email,
+      };
+
       const newAppointment = new appointmentModel(req.body);
       await newAppointment.save();
 
-      const user = await userModel.findOne({ _id: req.body.doctorInfo.userId });
-      user.notification.push({
+      const doctorUser = await userModel.findOne({ _id: req.body.doctorInfo.userId });
+      doctorUser.notification.push({
           type: "New Appointment Request",
-         
-         message: `A new appointment request from ${req.body.userInfo.name}`,
-         
-          onClickPath: "/user/appointments",
+          message: `A new appointment request from ${req.body.userInfo.name}`,
+          data: {
+            
+            onClickPath: "/doctor-appointments" // Ensure the path matches your route definition
+          }
       });
-      await user.save();
+      await doctorUser.save();
 
       res.status(200).send({
           success: true,
@@ -206,6 +215,7 @@ const bookAppointmentController = async (req, res) => {
       });
   }
 };
+
 
 const bookingAvailabilityController = async (req, res) => {
   try {

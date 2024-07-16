@@ -84,7 +84,7 @@ const doctorAppointmentsController = async (req, res) => {
 };
 
 // controller file (e.g., userController.js)
-const updateStatusController = async (req, res) => {
+updateStatusController = async (req, res) => {
   try {
     const { appointmentsId, status } = req.body;
     const appointment = await appointmentModel.findByIdAndUpdate(appointmentsId, { status });
@@ -94,7 +94,10 @@ const updateStatusController = async (req, res) => {
     notification.push({
       type: 'status-updated',
       message: `Your appointment status has been updated to ${status}`,
-        onClickPath: '/doctor-appointments',
+       data:{
+        onClickPath: '/appointments',
+
+       }
     });
 
     user.notification = notification;
@@ -112,5 +115,4 @@ const updateStatusController = async (req, res) => {
     });
   }
 };
-
 module.exports = { getDoctorInfoController,updateProfileController,getDoctorByIdController,doctorAppointmentsController,updateStatusController }
