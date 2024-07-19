@@ -6,40 +6,40 @@ const userModel = require("../models/userModels")
 
 
 const getAllUsersController = async (req, res) => {
-    try {
-        const users = await userModel.find({})
-        res.status(200).send({
-            success: true,
-            message: 'user data list',
-            data: users
-        })
-    } catch (error) {
-        console.log(error);
-        res.status(500).send({
-            success: false,
-            message: 'error while fetching users',
-            error
-        })
-    }
+  try {
+    const users = await userModel.find({})
+    res.status(200).send({
+      success: true,
+      message: 'user data list',
+      data: users
+    })
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      message: 'error while fetching users',
+      error
+    })
+  }
 }
 
 const getallDoctorsController = async (req, res) => {
-    try {
-        const doctors = await doctorModel.find({})
-        res.status(200).send({
-            success: true,
-            message: 'Doctors data list',
-            data: doctors,
-        })
+  try {
+    const doctors = await doctorModel.find({})
+    res.status(200).send({
+      success: true,
+      message: 'Doctors data list',
+      data: doctors,
+    })
 
-    } catch (error) {
-        console.log(error)
-        res.status(500).send({
-            success: 'false',
-            message: 'error while getting doctor data',
-            error
-        })
-    }
+  } catch (error) {
+    console.log(error)
+    res.status(500).send({
+      success: 'false',
+      message: 'error while getting doctor data',
+      error
+    })
+  }
 }
 
 // Doctor Account status
@@ -57,7 +57,7 @@ const changeAccountStatusController = async (req, res) => {
         onClickPath: "/doctor-appointments", // Update the path to match your route
       },
     });
-    user.isDoctor = status === "approved" ? true : false;
+    user.isDoctor = status === "confirm" ? true : false;
     await user.save();
     res.status(201).send({
       success: true,

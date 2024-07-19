@@ -3,7 +3,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require('jsonwebtoken');
 const doctorModel = require('../models/doctorModel');
 const appointmentModel = require('../models/appointmentModel');
-const moment=require('moment')
+const moment = require('moment')
 
 // Register callback
 const registerController = async (req, res) => {
@@ -44,10 +44,10 @@ const loginController = async (req, res) => {
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
       expiresIn: "1d",
     });
-    res.status(200).send({ message: "Login Success", success: true, data:token });
+    res.status(200).send({ message: "Login Success", success: true, data: token });
   } catch (error) {
     console.log(error);
-    res.status(500).send({ message: "Error logging in",success:false,error });
+    res.status(500).send({ message: "Error logging in", success: false, error });
   }
 };
 
@@ -152,7 +152,7 @@ const deleteAllNotificationController = async (req, res) => {
 //Get all doc
 const getAllDoctorsController = async (req, res) => {
   try {
-    const doctors = await doctorModel.find({ status: 'approved' })
+    const doctors = await doctorModel.find({ status: 'confirm' })
     res.status(200).send({
       success: true,
       message: 'Doctors lists fetching successfully',
@@ -173,84 +173,84 @@ const getAllDoctorsController = async (req, res) => {
 
 const bookAppointmentController = async (req, res) => {
   try {
-      // Parse the date and time
-      const date = moment(req.body.date, "DD-MM-YYYY").format('YYYY-MM-DD');
-      const time = moment(req.body.time, "HH:mm").format("HH:mm");
+    // Parse the date and time
+    const date = moment(req.body.date, "DD-MM-YYYY").format('YYYY-MM-DD');
+    const time = moment(req.body.time, "HH:mm").format("HH:mm");
 
-      req.body.date = date;
-      req.body.time = time;
-      req.body.status = "pending";
+    req.body.date = date;
+    req.body.time = time;
+    req.body.status = "pending";
 
-      // Fetch user information
-      const user = await userModel.findOne({ _id: req.body.userId });
+    // Fetch user information
+    const user = await userModel.findOne({ _id: req.body.userId });
 
-      req.body.userInfo = {
-          name: user.name,
-          email: user.email,
-      };
+    req.body.userInfo = {
+      name: user.name,
+      email: user.email,
+    };
 
-      const newAppointment = new appointmentModel(req.body);
-      await newAppointment.save();
+    const newAppointment = new appointmentModel(req.body);
+    await newAppointment.save();
 
-      const doctorUser = await userModel.findOne({ _id: req.body.doctorInfo.userId });
-      doctorUser.notification.push({
-          type: "New Appointment Request",
-          message: `A new appointment request from ${req.body.userInfo.name}`,
-          data: {
-            
-            onClickPath: "/doctor-appointments" // Ensure the path matches your route definition
-          }
-      });
-      await doctorUser.save();
+    const doctorUser = await userModel.findOne({ _id: req.body.doctorInfo.userId });
+    doctorUser.notification.push({
+      type: "New Appointment Request",
+      message: `A new appointment request from ${req.body.userInfo.name}`,
+      data: {
 
-      res.status(200).send({
-          success: true,
-          message: "Appointment booked successfully.",
-      });
+        onClickPath: "/doctor-appointments" // Ensure the path matches your route definition
+      }
+    });
+    await doctorUser.save();
+
+    res.status(200).send({
+      success: true,
+      message: "Appointment booked successfully.",
+    });
   } catch (error) {
-      res.status(500).send({
-          message: "Error while booking appointment",
-          success: false,
-          error: error.message,
-      });
+    res.status(500).send({
+      message: "Error while booking appointment",
+      success: false,
+      error: error.message,
+    });
   }
 };
 
 
 const bookingAvailabilityController = async (req, res) => {
   try {
-      const date = moment(req.body.date, "DD-MM-YYYY").format('YYYY-MM-DD');
-      const time = moment(req.body.time, "HH:mm").format("HH:mm");
-      const fromTime = moment(time, "HH:mm").subtract(1, 'hours').format("HH:mm");
-      const toTime = moment(time, "HH:mm").add(1, 'hours').format("HH:mm");
-      const doctorId = req.body.doctorId;
+    const date = moment(req.body.date, "DD-MM-YYYY").format('YYYY-MM-DD');
+    const time = moment(req.body.time, "HH:mm").format("HH:mm");
+    const fromTime = moment(time, "HH:mm").subtract(1, 'hours').format("HH:mm");
+    const toTime = moment(time, "HH:mm").add(1, 'hours').format("HH:mm");
+    const doctorId = req.body.doctorId;
 
-      const appointments = await appointmentModel.find({
-          doctorId,
-          date,
-          time: {
-              $gte: fromTime,
-              $lte: toTime,
-          },
+    const appointments = await appointmentModel.find({
+      doctorId,
+      date,
+      time: {
+        $gte: fromTime,
+        $lte: toTime,
+      },
+    });
+
+    if (appointments.length > 0) {
+      return res.status(200).send({
+        message: "Appointments not available at this time",
+        success: false,
       });
-
-      if (appointments.length > 0) {
-          return res.status(200).send({
-              message: "Appointments not available at this time",
-              success: false,
-          });
-      } else {
-          return res.status(200).send({
-              success: true,
-              message: "Appointments available",
-          });
-      }
+    } else {
+      return res.status(200).send({
+        success: true,
+        message: "Appointments available",
+      });
+    }
   } catch (error) {
-      res.status(500).send({
-          message: "Error while checking availability",
-          success: false,
-          error: error.message,
-      });
+    res.status(500).send({
+      message: "Error while checking availability",
+      success: false,
+      error: error.message,
+    });
   }
 };
 
@@ -274,4 +274,4 @@ const userAppointmentsController = async (req, res) => {
   }
 };
 
-module.exports = { loginController, registerController, authController, applyDoctorController, getAllNotificationController, deleteAllNotificationController, getAllDoctorsController, bookAppointmentController,bookingAvailabilityController,userAppointmentsController };
+module.exports = { loginController, registerController, authController, applyDoctorController, getAllNotificationController, deleteAllNotificationController, getAllDoctorsController, bookAppointmentController, bookingAvailabilityController, userAppointmentsController };
